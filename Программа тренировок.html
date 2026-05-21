@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Программа тренировок</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #222;
+    --accent: #c8f542;
+    --accent2: #42c8f5;
+    --text: #f0f0f0;
+    --muted: #666;
+    --push: #c8f542;
+    --pull: #42c8f5;
+    --legs: #f5a342;
+    --full: #f542a3;
+    --pool: #42c8f5;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 48px 40px 32px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: 'GYM';
+    position: absolute;
+    right: -20px;
+    top: -20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 200px;
+    color: #fff;
+    opacity: 0.02;
+    line-height: 1;
+    user-select: none;
+    pointer-events: none;
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .header-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 8vw, 80px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+  }
+  .header-title span { color: var(--accent); }
+  .header-meta {
+    text-align: right;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.8;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .header-meta strong {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--text);
+    letter-spacing: 2px;
+  }
+
+  /* NAV */
+  .nav {
+    display: flex;
+    gap: 0;
+    padding: 0 40px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 16px 24px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .nav-btn:hover { color: var(--text); }
+  .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* MAIN */
+  .main { padding: 40px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeUp 0.3s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* WEEK TOGGLE */
+  .week-toggle {
+    display: inline-flex;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px;
+    margin-bottom: 32px;
+  }
+  .week-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .week-btn.active { background: var(--accent); color: #000; }
+
+  /* PHASE LABEL */
+  .phase-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .phase-label::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  /* DAY GRID */
+  .day-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .day-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .day-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--card-color, var(--muted));
+    transition: width 0.2s;
+  }
+  .day-card:hover { border-color: var(--card-color, var(--accent)); transform: translateY(-2px); }
+  .day-card:hover::before { width: 4px; }
+  .day-card.active { border-color: var(--card-color, var(--accent)); background: var(--surface2); }
+  .day-num { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .day-name { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px; line-height: 1; margin-bottom: 10px; }
+  .day-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--card-color) 15%, transparent);
+    color: var(--card-color);
+  }
+  .rest-card { cursor: default; opacity: 0.4; }
+  .rest-card:hover { transform: none; border-color: var(--border); }
+
+  /* EXERCISE DETAIL */
+  .detail-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 32px;
+    animation: fadeUp 0.25s ease;
+  }
+  .detail-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .detail-header-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+  }
+  .detail-header-title span { color: var(--accent); }
+  .ex-table { width: 100%; border-collapse: collapse; }
+  .ex-table tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  .ex-table tr:last-child { border-bottom: none; }
+  .ex-table tr:hover { background: var(--surface2); }
+  .ex-table td { padding: 14px 24px; vertical-align: middle; }
+  .ex-num { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--muted); width: 40px; }
+  .ex-name { font-size: 14px; font-weight: 500; }
+  .ex-note { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .ex-sets { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; color: var(--accent); text-align: right; white-space: nowrap; }
+
+  /* INFO BOX */
+  .info-box {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 14px 20px;
+    margin-bottom: 32px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* POOL */
+  .protocol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  @media (max-width: 600px) { .protocol-grid { grid-template-columns: 1fr; } }
+  .protocol-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .protocol-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 1px;
+  }
+  .protocol-header .badge {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+  .badge-restore { background: color-mix(in srgb, var(--pool) 15%, transparent); color: var(--pool); }
+  .badge-hiit { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); }
+  .pool-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .pool-row:last-child { border-bottom: none; }
+  .pool-dist { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; color: var(--pool); }
+
+  /* FOOD */
+  .macro-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .macro-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    text-align: center;
+  }
+  .macro-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 2px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .macro-unit { font-size: 13px; color: var(--muted); letter-spacing: 0.05em; }
+  .meal-timeline { position: relative; padding-left: 24px; }
+  .meal-timeline::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 1px; background: var(--border); }
+  .meal-item { position: relative; padding: 0 0 28px 24px; }
+  .meal-item::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 6px;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .meal-item:last-child { padding-bottom: 0; }
+  .meal-time { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  .meal-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .meal-macros { font-size: 12px; color: var(--muted); }
+
+  /* TIPS */
+  .tips-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .tips-grid { grid-template-columns: 1fr; } }
+  .tip-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 24px;
+  }
+  .tip-card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tip-card-title span { color: var(--accent); }
+  .tip-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tip-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .tip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .tip-label { font-weight: 500; margin-bottom: 2px; }
+  .tip-desc { color: var(--muted); line-height: 1.5; }
+
+  /* SUPPS */
+  .supp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 16px; }
+  .supp-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    font-size: 13px;
+  }
+  .supp-name { font-weight: 500; margin-bottom: 4px; }
+  .supp-dose { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; color: var(--accent2); margin-bottom: 4px; }
+  .supp-note { font-size: 12px; color: var(--muted); }
+
+  @media (max-width: 600px) {
+    .header { padding: 32px 20px 24px; }
+    .nav { padding: 0 20px; }
+    .main { padding: 24px 20px; }
+    .macro-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .macro-val { font-size: 26px; }
+    .ex-table td { padding: 12px 16px; }
+    .detail-header { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="header-title">
+      ПЛАН<br><span>ВОССТАНОВЛЕНИЯ</span>
+    </div>
+    <div class="header-meta">
+      <strong>183 / 98 КГ</strong>
+      Бодибилдинг<br>
+      Бассейн + Тренажёры
+    </div>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showTab('train', this)">Тренировки</button>
+  <button class="nav-btn" onclick="showTab('pool', this)">Бассейн</button>
+  <button class="nav-btn" onclick="showTab('food', this)">Питание</button>
+  <button class="nav-btn" onclick="showTab('tips', this)">Рекомендации</button>
+</nav>
+
+<main class="main">
+
+  <!-- ===== ТРЕНИРОВКИ ===== -->
+  <div class="tab-content active" id="tab-train">
+    <div class="week-toggle">
+      <button class="week-btn active" onclick="showWeek(1, this)">3 дня / нед</button>
+      <button class="week-btn" onclick="showWeek(2, this)">5 дней / нед</button>
+    </div>
+
+    <!-- 3 ДНЯ -->
+    <div id="week1">
+      <div class="phase-label">Фаза 1 — восстановление (нед. 1–3)</div>
+      <div class="info-box">Мышечная память работает в твою пользу, но сухожилия отстают. Первые 3 недели — 60–70% от рабочих весов, фокус на технику и связь мозг-мышца. Прогрессия +5% или +1 подход каждые 1–2 недели.</div>
+      <div class="day-grid" id="grid-w1">
+        <div class="day-card" style="--card-color: var(--push)" onclick="showDay('w1d1', this)">
+          <div class="day-num">День 1</div>
+          <div class="day-name">Толчок</div>
+          <span class="day-tag">Push</span>
+        </div>
+        <div class="day-card" style="--card-color: var(--pull)" onclick="showDay('w1d2', this)">
+          <div class="day-num">День 2</div>
+          <div class="day-name">Тяга</div>
+          <span class="day-tag">Pull</span>
+        </div>
+        <div class="day-card" style="--card-color: var(--legs)" onclick="showDay('w1d3', this)">
+          <div class="day-num">День 3</div>
+          <div class="day-name">Ноги</div>
+          <span class="day-tag">Legs</span>
+        </div>
+      </div>
+      <div id="detail-w1"></div>
+
+      <div class="phase-label" style="margin-top: 8px;">Фаза 2 — гипертрофия (нед. 4+)</div>
+      <div class="info-box">Сплит остаётся тот же. Веса растут, добавляются рабочие подходы. К концу недели 8 должен выйти на 85–90% от старых рабочих весов.</div>
+    </div>
+
+    <!-- 5 ДНЕЙ -->
+    <div id="week2" style="display:none">
+      <div class="phase-label">Фаза 1 — восстановление (нед. 1–3)</div>
+      <div class="info-box">5 дней позволяют добавить специализацию и прокачать приоритетные группы дважды в неделю.</div>
+      <div class="day-grid" id="grid-w2">
+        <div class="day-card" style="--card-color: var(--push)" onclick="showDay('w2d1', this)">
+          <div class="day-num">День 1</div>
+          <div class="day-name">Толчок А</div>
+          <span class="day-tag">Push</span>
+        </div>
+        <div class="day-card" style="--card-color: var(--pull)" onclick="showDay('w2d2', this)">
+          <div class="day-num">День 2</div>
+          <div class="day-name">Тяга А</div>
+          <span class="day-tag">Pull</span>
+        </div>
+        <div class="day-card" style="--card-color: var(--legs)" onclick="showDay('w2d3', this)">
+          <div class="day-num">День 3</div>
+          <div class="day-name">Ноги А</div>
+          <span class="day-tag">Legs</span>
+        </div>
+        <div class="day-card" style="--card-color: var(--push)" onclick="showDay('w2d4', this)">
+          <div class="day-num">День 4</div>
+          <div class="day-name">Толчок Б</div>
+          <span class="day-tag">Push</span>
+        </div>
+        <div class="day-card" style="--card-color: var(--full)" onclick="showDay('w2d5', this)">
+          <div class="day-num">День 5</div>
+          <div class="day-name">Тяга + Ноги</div>
+          <span class="day-tag">Full</span>
+        </div>
+      </div>
+      <div id="detail-w2"></div>
+    </div>
+  </div>
+
+  <!-- ===== БАССЕЙН ===== -->
+  <div class="tab-content" id="tab-pool">
+    <div class="info-box">Бассейн — активное восстановление и кардио без осевой нагрузки. Идеально 2 раза в неделю, на следующий день после тяжёлых тренировок.</div>
+    <div class="protocol-grid">
+      <div class="protocol-card">
+        <div class="protocol-header">Восстановление <span class="badge badge-restore">Нед 1–4</span></div>
+        <div class="pool-row"><span>Лёгкий кроль (пульс 120–130)</span><span class="pool-dist">400–600 м</span></div>
+        <div class="pool-row"><span>Брасс (активный отдых)</span><span class="pool-dist">200 м</span></div>
+        <div class="pool-row"><span>На спине / баттерфляй</span><span class="pool-dist">200 м</span></div>
+        <div class="pool-row"><span style="color: var(--muted); font-size:12px;">Итого</span><span class="pool-dist">~30 мин</span></div>
+      </div>
+      <div class="protocol-card">
+        <div class="protocol-header">HIIT <span class="badge badge-hiit">Нед 5+</span></div>
+        <div class="pool-row"><span>Разминка кроль</span><span class="pool-dist">200 м</span></div>
+        <div class="pool-row"><span>Спринт 25 м + отдых 30 сек</span><span class="pool-dist">× 10</span></div>
+        <div class="pool-row"><span>Заминка</span><span class="pool-dist">200 м</span></div>
+        <div class="pool-row"><span style="color: var(--muted); font-size:12px;">Жиросжигание без потери мышц</span><span class="pool-dist">~25 мин</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ПИТАНИЕ ===== -->
+  <div class="tab-content" id="tab-food">
+    <div class="info-box">Бюджетный подход: яйца, куриные бёдра, творог, консервы, крупы. Реальная цель — 160–180 г белка в день (лучше меньше, но стабильно, чем идеал раз в неделю).</div>
+
+    <div class="macro-row">
+      <div class="macro-card">
+        <div class="macro-val" style="color: var(--accent)">2600–<br>2900</div>
+        <div class="macro-unit">ккал / день</div>
+      </div>
+      <div class="macro-card">
+        <div class="macro-val" style="color: var(--accent2)">160–180 г</div>
+        <div class="macro-unit">белок (реал.)</div>
+      </div>
+      <div class="macro-card">
+        <div class="macro-val" style="color: var(--full)">300–340 г</div>
+        <div class="macro-unit">углеводы</div>
+      </div>
+    </div>
+
+    <!-- ДЕШЁВЫЕ ИСТОЧНИКИ БЕЛКА -->
+    <div style="margin-bottom: 28px;">
+      <div class="phase-label">Лучший белок за копейки</div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+        <div class="supp-card">
+          <div class="supp-name">Яйца</div>
+          <div class="supp-dose">6–7 Г/ШТ</div>
+          <div class="supp-note">Самый дешёвый белок. 10 яиц в день = 60–70 г</div>
+        </div>
+        <div class="supp-card">
+          <div class="supp-name">Куриные бёдра</div>
+          <div class="supp-dose">17 Г/100 Г</div>
+          <div class="supp-note">Вдвое дешевле грудки. Варить оптом на неделю</div>
+        </div>
+        <div class="supp-card">
+          <div class="supp-name">Творог 5–9%</div>
+          <div class="supp-dose">16 Г/100 Г</div>
+          <div class="supp-note">200–250 г в день — 32–40 г белка дёшево</div>
+        </div>
+        <div class="supp-card">
+          <div class="supp-name">Тунец консерв.</div>
+          <div class="supp-dose">22 Г/100 Г</div>
+          <div class="supp-note">В собств. соку. Банка = 26 г белка за ~90 р</div>
+        </div>
+        <div class="supp-card">
+          <div class="supp-name">Гречка</div>
+          <div class="supp-dose">13 Г/100 Г</div>
+          <div class="supp-note">+ углеводы. 200 г сухой = 26 г белка</div>
+        </div>
+        <div class="supp-card">
+          <div class="supp-name">Молоко 3.2%</div>
+          <div class="supp-dose">3 Г/100 МЛ</div>
+          <div class="supp-note">500 мл = 15 г белка + жиры + углеводы</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ПЛАН ДНЯ -->
+    <div class="phase-label">Примерный день (бюджетно)</div>
+    <div class="meal-timeline">
+      <div class="meal-item">
+        <div class="meal-time">07:30 — Завтрак</div>
+        <div class="meal-name">Овсянка 100 г на молоке + 4 яйца (варёные / омлет)</div>
+        <div class="meal-macros">~650 ккал · Б: 38 г · У: 70 г · ~50–60 р</div>
+      </div>
+      <div class="meal-item">
+        <div class="meal-time">13:00 — Обед</div>
+        <div class="meal-name">Гречка 150 г + куриные бёдра 200 г (варёные) + капуста / морковь</div>
+        <div class="meal-macros">~700 ккал · Б: 48 г · У: 80 г · ~80–100 р</div>
+      </div>
+      <div class="meal-item">
+        <div class="meal-time">16:30 — Пред-трен</div>
+        <div class="meal-name">Хлеб + тунец из банки + 2 яйца вкрутую</div>
+        <div class="meal-macros">~420 ккал · Б: 40 г · У: 35 г · ~60–80 р</div>
+      </div>
+      <div class="meal-item">
+        <div class="meal-time">19:30 — После тренировки</div>
+        <div class="meal-name">Творог 250 г + банан (или хлеб с мёдом)</div>
+        <div class="meal-macros">~420 ккал · Б: 40 г · У: 40 г · ~50–70 р</div>
+      </div>
+      <div class="meal-item">
+        <div class="meal-time">22:00 — Ужин</div>
+        <div class="meal-name">Рис 100 г + куриные бёдра 150 г или 3 яйца</div>
+        <div class="meal-macros">~500 ккал · Б: 35 г · У: 60 г · ~50–70 р</div>
+      </div>
+    </div>
+
+    <!-- КОГДА НЕ ХВАТАЕТ БЕЛКА -->
+    <div style="margin-top: 28px;">
+      <div class="phase-label">Когда совсем туго — лайфхаки</div>
+      <div class="tips-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="tip-card">
+          <div class="tip-card-title">Добрать <span>белок</span></div>
+          <div class="tip-item">
+            <div class="tip-icon">🥚</div>
+            <div><div class="tip-label">+2–3 яйца к любому блюду</div><div class="tip-desc">Яйцо — ~6 г белка, ~10–12 р. Самое дешёвое решение</div></div>
+          </div>
+          <div class="tip-item">
+            <div class="tip-icon">🥛</div>
+            <div><div class="tip-label">Молоко вместо воды</div><div class="tip-desc">Готовить кашу на молоке — +5–8 г белка без усилий</div></div>
+          </div>
+          <div class="tip-item">
+            <div class="tip-icon">🐟</div>
+            <div><div class="tip-label">Консервы тунца / скумбрии</div><div class="tip-desc">Скумбрия ещё дешевле — банка ~25 г белка за 60–70 р</div></div>
+          </div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-card-title">Добрать <span>углей</span></div>
+          <div class="tip-item">
+            <div class="tip-icon">🍞</div>
+            <div><div class="tip-label">Хлеб — твой друг</div><div class="tip-desc">2–3 куска к любому приёму = +30–40 г углей. Дёшево и сытно</div></div>
+          </div>
+          <div class="tip-item">
+            <div class="tip-icon">🍌</div>
+            <div><div class="tip-label">Бананы</div><div class="tip-desc">1 банан = 27 г углей. Дешевле большинства «спортивных» перекусов</div></div>
+          </div>
+          <div class="tip-item">
+            <div class="tip-icon">🍯</div>
+            <div><div class="tip-label">Мёд / варенье + творог</div><div class="tip-desc">Быстро закрыть углеводное окно после тренировки без затрат</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== СОВЕТЫ ===== -->
+  <div class="tab-content" id="tab-tips">
+    <div class="tips-grid">
+      <div class="tip-card">
+        <div class="tip-card-title">Мышечная <span>память</span></div>
+        <div class="tip-item">
+          <div class="tip-icon">⏱</div>
+          <div><div class="tip-label">Сроки</div><div class="tip-desc">60–80% формы возвращается за 8–10 недель при правильном подходе</div></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon">🎯</div>
+          <div><div class="tip-label">Веса в нед. 1–2</div><div class="tip-desc">60–70% от рабочего максимума. Фокус на технику, не на ego</div></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon">📈</div>
+          <div><div class="tip-label">Прогрессия</div><div class="tip-desc">+5% к весу или +1 подход каждые 1–2 недели — стабильно и без срывов</div></div>
+        </div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-card-title">Восстановление</div>
+        <div class="tip-item">
+          <div class="tip-icon">💤</div>
+          <div><div class="tip-label">Сон</div><div class="tip-desc">7–8 часов минимум. Там происходит 80% роста. Без сна нет гипертрофии</div></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon">🏊</div>
+          <div><div class="tip-label">Бассейн после тяж. дней</div><div class="tip-desc">Лёгкое плавание снимает крепатуру лучше пассивного отдыха</div></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon">🔄</div>
+          <div><div class="tip-label">МФР / растяжка</div><div class="tip-desc">5–10 мин после каждой тренировки. Критично после перерыва</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px;">
+      <div class="phase-label">Спортивное питание</div>
+      <div class="supp-grid">
+        <div class="supp-card">
+          <div class="supp-name">Протеин</div>
+          <div class="supp-dose">1–2 ШЕЙКА</div>
+          <div class="supp-note">После тренировки, можно перед сном (казеин)</div>
+        </div>
+        <div class="supp-card">
+          <div class="supp-name">Креатин</div>
+          <div class="supp-dose">5 Г / ДЕНЬ</div>
+          <div class="supp-note">Без загрузки. Каждый день, в том числе в дни отдыха</div>
+        </div>
+        <div class="supp-card">
+          <div class="supp-name">Омега-3</div>
+          <div class="supp-dose">2–3 Г / ДЕНЬ</div>
+          <div class="supp-note">Суставы, воспаление, сердце — обязательно</div>
+        </div>
+        <div class="supp-card">
+          <div class="supp-name">Витамин D3</div>
+          <div class="supp-dose">2–4К МЕ</div>
+          <div class="supp-note">С едой. Особенно важен осенью и зимой</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const exercises = {
+  w1d1: { title: "День 1 — Толчок", sub: "Грудь / Плечи / Трицепс", ex: [
+    ["Жим штанги лёжа", "60–70% от макс. в нед. 1–2", "4 × 8–10"],
+    ["Жим гантелей на наклонной 30°", "Растяжка в нижней точке", "3 × 10–12"],
+    ["Жим гантелей сидя (плечи)", "", "4 × 10"],
+    ["Разводки гантелей стоя", "Боковая дельта — акцент", "3 × 12–15"],
+    ["Французский жим / трицепс в блоке", "", "3 × 12"],
+    ["Отжимания на брусьях", "Если нет боли в плечах", "3 × до отказа"]
+  ]},
+  w1d2: { title: "День 2 — Тяга", sub: "Спина / Бицепс", ex: [
+    ["Тяга штанги в наклоне", "Или Т-тяга", "4 × 8–10"],
+    ["Подтягивания / тяга блока к груди", "По самочувствию", "4 × 10"],
+    ["Тяга гантели одной рукой", "Акцент на широчайшую", "3 × 10 каждая"],
+    ["Тяга блока к поясу (горизонт.)", "", "3 × 12"],
+    ["Сгибания со штангой (бицепс)", "", "3 × 10–12"],
+    ["Молотки с гантелями", "Брахиалис — добавляет толщину", "3 × 12"]
+  ]},
+  w1d3: { title: "День 3 — Ноги", sub: "Квадрицепс / Бицепс бедра / Икры", ex: [
+    ["Приседания со штангой", "До параллели нед. 1–2, без фанатизма", "4 × 8–10"],
+    ["Жим ногами", "Вариация для объёма", "4 × 10–12"],
+    ["Румынская тяга", "Акцент на бицепс бедра", "4 × 10"],
+    ["Выпады / болгарские сплит-приседы", "", "3 × 12 каждая нога"],
+    ["Разгибания + сгибания в тренажёре", "", "3 × 15"],
+    ["Подъёмы на икры (тренажёр стоя)", "", "4 × 15–20"]
+  ]},
+  w2d1: { title: "День 1 — Толчок А", sub: "Акцент: грудь", ex: [
+    ["Жим штанги лёжа", "", "5 × 8"],
+    ["Жим гантелей на наклонной", "", "4 × 10"],
+    ["Кроссовер / разводки", "Пиковое сокращение", "3 × 14"],
+    ["Жим гантелей сидя (плечи)", "", "3 × 10"],
+    ["Трицепс: блок + французский", "", "3+3 × 12"]
+  ]},
+  w2d2: { title: "День 2 — Тяга А", sub: "Акцент: спина, широчайшие", ex: [
+    ["Становая тяга", "Только с нед. 3, 60–70%", "4 × 6"],
+    ["Подтягивания широким хватом", "", "4 × max"],
+    ["Тяга блока к груди", "", "3 × 12"],
+    ["Горизонтальная тяга сидя", "", "3 × 12"],
+    ["Бицепс: штанга + концентрат.", "", "3+3 × 10"]
+  ]},
+  w2d3: { title: "День 3 — Ноги А", sub: "Квадрицепс, сила", ex: [
+    ["Приседания со штангой", "", "5 × 8"],
+    ["Жим ногами", "", "4 × 10"],
+    ["Выпады / болгарские сплит-приседы", "", "3 × 12"],
+    ["Разгибания ног в тренажёре", "", "3 × 15"],
+    ["Икры стоя", "", "4 × 20"]
+  ]},
+  w2d4: { title: "День 4 — Толчок Б", sub: "Акцент: плечи", ex: [
+    ["Армейский жим стоя", "", "4 × 8"],
+    ["Жим Арнольда", "", "3 × 10"],
+    ["Разводки стоя + тяга к подбородку", "", "3+3 × 12"],
+    ["Жим лёжа средним хватом", "", "3 × 10"],
+    ["Отжимания на брусьях", "", "3 × до отказа"]
+  ]},
+  w2d5: { title: "День 5 — Тяга + Ноги Б", sub: "Бицепс бедра, объём", ex: [
+    ["Румынская тяга", "", "4 × 10"],
+    ["Сгибания ног лёжа", "", "4 × 12"],
+    ["Тяга гантели одной рукой", "", "3 × 12"],
+    ["Пуловер в блоке", "Зубчатые + нижняя часть спины", "3 × 14"],
+    ["Молотки / концентрированные сгибания", "", "3 × 12"],
+    ["Икры сидя", "", "4 × 20"]
+  ]}
+};
+
+let activeWeek = 1;
+let activeDay = { w1: null, w2: null };
+
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function showWeek(n, btn) {
+  activeWeek = n;
+  document.getElementById('week1').style.display = n === 1 ? '' : 'none';
+  document.getElementById('week2').style.display = n === 2 ? '' : 'none';
+  document.querySelectorAll('.week-btn').forEach((b, i) => b.classList.toggle('active', i + 1 === n));
+}
+
+function showDay(key, card) {
+  const weekKey = key.startsWith('w1') ? 'w1' : 'w2';
+  const gridId = 'grid-' + weekKey;
+  const detailId = 'detail-' + weekKey;
+
+  if (activeDay[weekKey] === key) {
+    activeDay[weekKey] = null;
+    card.classList.remove('active');
+    document.getElementById(detailId).innerHTML = '';
+    return;
+  }
+
+  activeDay[weekKey] = key;
+  document.querySelectorAll('#' + gridId + ' .day-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+
+  const d = exercises[key];
+  const rows = d.ex.map((e, i) => `
+    <tr>
+      <td class="ex-num">${String(i + 1).padStart(2, '0')}</td>
+      <td>
+        <div class="ex-name">${e[0]}</div>
+        ${e[1] ? `<div class="ex-note">${e[1]}</div>` : ''}
+      </td>
+      <td class="ex-sets">${e[2]}</td>
+    </tr>
+  `).join('');
+
+  document.getElementById(detailId).innerHTML = `
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div class="detail-header-title">${d.title} <span>—</span> ${d.sub}</div>
+      </div>
+      <table class="ex-table">${rows}</table>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
